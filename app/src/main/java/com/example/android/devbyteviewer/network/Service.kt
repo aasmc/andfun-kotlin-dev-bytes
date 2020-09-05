@@ -34,7 +34,7 @@ import retrofit2.http.GET
  */
 interface DevbyteService {
     @GET("devbytes.json")
-    fun getPlaylist(): Deferred<NetworkVideoContainer>
+    suspend fun getPlaylist(): NetworkVideoContainer
 }
 
 /**
@@ -53,7 +53,7 @@ object Network {
     private val retrofit = Retrofit.Builder()
             .baseUrl("https://devbytes.udacity.com/")
             .addConverterFactory(MoshiConverterFactory.create(moshi))
-            .addCallAdapterFactory(CoroutineCallAdapterFactory())
+//            .addCallAdapterFactory(CoroutineCallAdapterFactory())
             .build()
 
     val devbytes = retrofit.create(DevbyteService::class.java)

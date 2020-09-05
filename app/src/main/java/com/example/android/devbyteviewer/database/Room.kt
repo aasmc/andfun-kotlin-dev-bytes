@@ -16,3 +16,56 @@
  */
 
 package com.example.android.devbyteviewer.database
+
+import android.content.Context
+import androidx.lifecycle.LiveData
+import androidx.room.*
+
+/**
+ * DAO interface that allows ROOM DB to work with classes defined as @Entity
+ */
+@Dao
+interface VideoDao {
+    /**
+     * Selects a liveData of list of DatabaseVideo from the DB
+     */
+    @Query("SELECT * FROM DATABASEVIDEO")
+    fun getVideos(): LiveData<List<DatabaseVideo>>
+
+    /**
+     * Inserts a variable number of videos to the DB
+     * If the same video is already in the DB then it replaces the old one with the new one
+     */
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertAll(vararg videos: DatabaseVideo)
+}
+
+/**
+ * Database class that defines videos database
+ */
+@Database(entities = [DatabaseVideo::class], version = 1)
+abstract class VideosDatabase : RoomDatabase() {
+    abstract val videoDao: VideoDao
+}
+
+/**
+ * Private instance of a DB that is necessary to create a singleton DB class
+ */
+private lateinit var INSTANCE: VideosDatabase
+
+/**
+ * Returns singleton DB in a threadsafe manner
+ */
+fun getDatabase(context: Context): VideosDatabase {
+    synchronized(VideosDatabase::class.java) {
+        // if DB is not initialized
+        if (!::INSTANCE.isInitialized) {
+            // build the DB by using Room DB builder
+            INSTANCE = Room.databaseBuilder(context.applicationContext,
+                    VideosDatabase::class.java,
+                    "videos")
+                    .build()
+        }
+    }
+    return INSTANCE
+}
